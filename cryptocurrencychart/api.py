@@ -14,6 +14,7 @@ class CryptoCurrencyChartApi:
         self.secret = api_secret or parser.get('default', 'SECRET')
         self.session = requests.session()
         self.session.auth = requests.auth.HTTPBasicAuth(self.key, self.secret)
+        self._coin_dict = None
 
     def _url(self, part, **kwargs):
         fkwargs = {k: self._format(v) for k, v in kwargs.items()}
@@ -27,12 +28,12 @@ class CryptoCurrencyChartApi:
     @lru_cache()
     def get_base_currencies(self):
         url = self._url(urls.GET_BASE_CURRENCIES)
-        return self.get(url)
+        return self.get(url)['baseCurrencies']
 
     @lru_cache()
     def get_coins(self):
         url = self._url(urls.GET_COINS)
-        return self.get(url)
+        return self.get(url)['coins']
 
     @lru_cache()
     def get_data_types(self):
@@ -42,7 +43,7 @@ class CryptoCurrencyChartApi:
     def set_base_currency(self, currency, validate=True):
         if validate:
             currencies = self.get_base_currencies()
-            if currency not in currencies['baseCurrencies']:
+            if currency not in currencies:
                 raise ValueError('Invalid base currency: {}'.format(currency))
         self.BASE = currency
 
@@ -50,18 +51,31 @@ class CryptoCurrencyChartApi:
         if base_currency is None:
             base_currency = self.BASE
         url = self._url(urls.VIEW_COIN, coin=coin, date=date, base=base_currency)
-        return self.get(url)
+        return self.get(url)['coin']
 
     def view_coin_history(self, coin: int, start: datetime.date, end: datetime.date, base_currency: str = None):
         if base_currency is None:
             base_currency = self.BASE
-        url = self._url(urls.VIEW_COIN, coin=coin, start=start, end=end, base=base_currency)
+        url = self._url(urls.VIEW_COIN_HISTORY, coin=coin, start=start, end=end, base=base_currency)
         return self.get(url)
 
     def get(self, url, **kwargs):
         response = self.session.get(url, **kwargs)
         response.raise_for_status()
         return response.json()
+
+    @property
+    def coin_dict(self):
+        if not self._coin_dict:
+            coins = self.get_coins()
+            self._coin_dict = {i['code']: i for i in coins}
+        return self._coin_dict
+
+    def __getitem__(self, item):
+        return self.coin_dict[item]
+
+    def __contains__(self, item):
+        return item in self.coin_dict
 
     def close(self):
         self.session.close()
