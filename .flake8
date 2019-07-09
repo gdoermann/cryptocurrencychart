@@ -1,0 +1,9 @@
+[flake8]
+exclude =
+    .git,
+    __pycache__,
+    __init__.py,
+    build,
+    dist,
+
+max-line-length = 120

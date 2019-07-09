@@ -22,6 +22,7 @@ setup(
     version=version,
     description='cryptocurrencychart is a wrapper around the cryptocurrencychart.com api.',
     long_description=README,
+    long_description_content_type='text/markdown',
     author='Greg Doermann',
     author_email='greg@that.bz',
     url='https://github.com/gdoermann/cryptocurrencychart',

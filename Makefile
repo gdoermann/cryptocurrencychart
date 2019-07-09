@@ -13,7 +13,11 @@ test_format: install_deps
 test: test_format
 	python setup.py test
 
-release: test
-	python setup.py sdist upload
+build: test
+	python setup.py sdist bdist_wheel
 
+test_release: build
+	twine upload -s -i gdoermann@gmail.com --repository-url https://test.pypi.org/legacy/ dist/*
 
+upload_release:
+	twine upload -s -i gdoermann@gmail.com --repository-url https://upload.pypi.org/legacy/ dist/*
