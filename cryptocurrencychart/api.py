@@ -53,10 +53,13 @@ class CryptoCurrencyChartApi:
         url = self._url(urls.VIEW_COIN, coin=coin, date=date, base=base_currency)
         return self.get(url)['coin']
 
-    def view_coin_history(self, coin: int, start: datetime.date, end: datetime.date, base_currency: str = None):
+    def view_coin_history(self, coin: int, start: datetime.date, 
+            end: datetime.date, dtype: str ='marketCap', base_currency: str = None):
         if base_currency is None:
             base_currency = self.BASE
-        url = self._url(urls.VIEW_COIN_HISTORY, coin=coin, start=start, end=end, base=base_currency)
+        url = self._url(urls.VIEW_COIN_HISTORY, coin=coin, start=start, 
+                dtype=dtype,
+                end=end, base=base_currency)
         return self.get(url)
 
     def get(self, url, **kwargs):
